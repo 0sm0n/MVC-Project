@@ -7,6 +7,7 @@ abstract class Model extends \mysqli
     protected $primaryKey = 'id';
     private $inquiry = '';
     private $where_query = '';
+    private $join_query = '';
 
     public function __construct()
     {
@@ -16,11 +17,21 @@ abstract class Model extends \mysqli
     }
 
 
-    # Вывод данных из таблица БД
-    public function get()
+    /**
+     * Выгрузка данных из таблицы базы данных
+     *
+     * @param array $columns - массив колонок, которые нужно получить
+     * @return mixed
+     */
+    public function get($columns = [])
     {
-        $this->where_query = !$this->where_query ? '' : 'WHERE ' . $this->where_query;
-        $this->inquiry = $this->inquiry ?: "SELECT * FROM `{$this->table}` {$this->where_query}";
+        $nameColumns = ($columns ? implode(',', $columns) : '*');
+        # Создаем базовый запрос на выгрузку всех данных из данной таблицы
+        $this->inquiry = "SELECT {$nameColumns} FROM `{$this->table}`";
+        # Добавляем если существуют JOIN соединения
+        $this->inquiry .= $this->join_query;
+        # Добавления Where если они прописаны
+        $this->inquiry .= !$this->where_query ? '' : 'WHERE ' . $this->where_query;
 
         # Удаление после выполнения!!!!
         return $this->query($this->inquiry)->fetch_all(MYSQLI_ASSOC);
@@ -93,6 +104,33 @@ abstract class Model extends \mysqli
         }
 
         return $this;
+    }
+
+    /**
+     * Соединение таблиц в СУБД
+     * Используется JOIN
+     *
+     * @param $table - Название таблицы
+     * @param $compound - Массив вида ['НазваниеКолонкиОсновнойТаблицы', 'НазваниеКолонкиСоединяемойТаблицы']
+     */
+    public function join($table, $compound)
+    {
+        $this->join_query .= " JOIN `{$table}` ON `{$this->table}`.`{$compound[0]}` = `{$table}`.`{$compound[1]}`";
+    }
+
+    /**
+     * Метод позволяющий определить уникальное ли значение в таблице
+     * @param $column - колонка для проверки на уникальность
+     * @param $value - значение которое проверяется
+     * @return bool
+     */
+    public function isNotUniqueColumn($column, $value)
+    {
+        $column = $this->real_escape_string(trim($column));
+        $value = $this->real_escape_string(trim($value));
+        $query = "SELECT COUNT(*) as `count` FROM `{$this->table}` WHERE `{$column}` = '{$value}'";
+        $result = $this->query($query)->fetch_assoc();
+        return $result['count'] > 0;
     }
 
     public function __destruct()
