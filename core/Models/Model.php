@@ -90,11 +90,11 @@ abstract class Model extends \mysqli
         return $this->find($id);
     }
 
-    # Where
-    # [
-    #    ['name', '=', 'value'],
-    #    ['name', '=', 'value']
-    # ]
+    /**
+     * Задаются параметры Where
+     * @param $arg - Вид должен быть таким: [ [column,'=', value] ]
+     * @return $this
+     */
     public function where($arg)
     {
         foreach($arg as $where_query) {

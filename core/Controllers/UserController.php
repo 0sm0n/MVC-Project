@@ -2,7 +2,6 @@
 
 namespace Controllers;
 
-use http\Header;
 use Models\User;
 
 class UserController extends BaseController
@@ -35,23 +34,24 @@ class UserController extends BaseController
         $_POST['password'] = sha1($_POST['password']);
         $user = new User();
 
-        if ($user ->isNotUniqueColumn('login', $_POST['login'])) {
+        # Проверка что логин уникальны!
+        if($user->isNotUniqueColumn('login', $_POST['login'])) {
             $errors['login'][] = 'Логин не является уникальным!';
             return view('register', compact('errors'));
         }
+
         $user = $user->create($_POST);
         return view('users/successRegister', compact('user'));
     }
 
-
     public function login()
     {
-        return view('user/login');
+        return view('users/login');
     }
+
     public function loginPost()
     {
         $errors = [];
-
         if(!isset($_POST['login'])) $errors['login'][] = 'Нет поля login';
         if(!isset($_POST['password'])) $errors['password'][] = 'Нет поля password';
 
@@ -59,26 +59,28 @@ class UserController extends BaseController
         if(empty($_POST['password'])) $errors['password'][] = 'Поле password не заполнено!';
 
         if($errors != [])
-            return view('register', compact('errors'));
+            return view('users/login', compact('errors'));
 
-
+        # Создаем запрос на поиск пользователя по введенным данным!
         $user = new User();
-        $user = $user->where(
+        $user->where(
             [
                 ['login', '=', $_POST['login']],
                 ['password', '=', sha1($_POST['password'])],
             ]
         );
-
+        # Получаем данные в переменную $fUser - при этом будет там массив всех данных
         $fUser = $user->get();
-        if (count($fUser)==0){
-            $errors['error_auth'][]='';
+
+        # Если пользователь не найден, то выведет ошибку!
+        if(count($fUser) == 0) {
+            $errors['error_auth'][] = 'tr';
             return view('users/login', compact('errors'));
         }
 
+        # записываем в сессию ID пользователя!
         $_SESSION['id'] = $fUser[0]['id'];
 
-        return header('location: /');
-
+        return redirect('/');
     }
 }

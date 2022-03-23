@@ -32,12 +32,21 @@
                 <li class="nav-item">
                     <a class="nav-link active" aria-current="page" href="/">Главная</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/login">Авторизация</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/register">Регистрация</a>
-                </li>
+                <?php if(has_session('id')): ?>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/posts/create">Создание поста</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/account">Мой аккаунт</a>
+                    </li>
+                <?php else: ?>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login">Авторизация</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/register">Регистрация</a>
+                    </li>
+                <?php endif; ?>
             </ul>
         </div>
     </div>
