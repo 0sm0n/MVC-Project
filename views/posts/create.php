@@ -34,12 +34,12 @@ $title = 'Создание нового поста';
                     <div class="mb-3">
                         <label for="inputDescription" class="form-label">Описание поста:</label>
                         <textarea
-                                name="description"
-                           <?= $isError('description', true) ?>
+                                name="descriptions"
+                           <?= $isError('descriptions', true) ?>
                            id="inputDescription"
                                 placeholder="Описание поста"
                                 required></textarea>
-                        <?= $isError('description') ?>
+                        <?= $isError('descriptions') ?>
                     </div>
                     <button type="submit" class="btn btn-success mt-1">Создать новый пост</button>
                 </form>

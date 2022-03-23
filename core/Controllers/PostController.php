@@ -2,6 +2,7 @@
 
 namespace Controllers;
 
+use Models\Comment;
 use Models\Post;
 
 class PostController extends BaseController
@@ -23,12 +24,12 @@ class PostController extends BaseController
         # Проверка на существование
         if(!isset($_POST['name'])) $errors['name'][] = 'Поле не существует!';
         if(!isset($_POST['keywords'])) $errors['keywords'][] = 'Поле не существует!';
-        if(!isset($_POST['description'])) $errors['description'][] = 'Поле не существует!';
+        if(!isset($_POST['descriptions'])) $errors['descriptions'][] = 'Поле не существует!';
 
         # Проверка на заполненность
         if(empty($_POST['name'])) $errors['name'][] = 'Поле не заполнено!';
         if(empty($_POST['keywords'])) $errors['keywords'][] = 'Поле не заполнено!';
-        if(empty($_POST['description'])) $errors['description'][] = 'Поле не заполнено!';
+        if(empty($_POST['descriptions'])) $errors['descriptions'][] = 'Поле не заполнено!';
 
         # Если существуют ошибки, отправляем их на клиента
         if($errors != [])
@@ -47,5 +48,39 @@ class PostController extends BaseController
 
         # Отправляем представление posts/create со значением выполнения операции успешно
         return view('posts/create', ['success' => true]);
+    }
+
+    public function index()
+    {
+        $posts = new Post();
+        return view('index', compact('posts'));
+    }
+
+    public function first()
+    {
+        $posts = new Post();
+        $post = $posts->find($_GET['id']);
+        return view('posts/first', compact('post', 'posts'));
+    }
+
+    public function commentCreate()
+    {
+        if(!has_session('id'))
+            return redirect('/');
+
+        $errors = [];
+        if(!isset($_POST['comment'])) $errors['comment'][] = 'Поле не существует!';
+        if(empty($_POST['comment'])) $errors['comment'][] = 'Поле не заполнено!';
+
+        if($errors != [])
+            return view('posts/first', compact('errors'));
+
+        $inputs = $_POST;
+        $inputs['user_id'] = session('id');
+        $inputs['post_id'] = $_GET['id'];
+        $comment = new Comment();
+        $comment->create($inputs);
+
+        return redirect("/posts?id={$inputs['post_id']}");
     }
 }
