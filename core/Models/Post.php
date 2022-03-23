@@ -2,7 +2,7 @@
 
 namespace Models;
 
-class Post extends Model
+class User extends Model
 {
-    protected  $table = 'posts';
+    protected $table = 'users';
 }
